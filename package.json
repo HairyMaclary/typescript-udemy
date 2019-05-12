@@ -1,0 +1,11 @@
+{
+  "name": "typescript-udemy",
+  "version": "1.0.0",
+  "description": "Max's course",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC"
+}
