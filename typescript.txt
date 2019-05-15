@@ -15,10 +15,12 @@ compiling: $ tsc script.ts, will, by default, create script.js in the same direc
 Types 
 --------------------------------
 
+In addition to all the regular es6 types, TypeScript also includes tuples, enums and any.
+
 
 Tuples
 
-In addition to all the regular es6 types, TypeScript also includes tuples. In TS these are arrays with mixed types and a limited number of items. 
+In TS tuples are arrays with mixed types and a limited number of items. 
 
 For example I might have a normal array for my address:
 
@@ -37,6 +39,137 @@ Then if we re assigned with the number and string reversed we would get an error
     address = ["Good Street", 145];  // TS error
 
 
+Enums
 
+Enums make numbers more expressive by encoding numbers into user friendly forms. 
+
+    enum Color {
+        Grey,  // 0
+        Green,  // 1
+        Blue    // 2
+    }
+
+    let myColor: Color = Color.Green;
+    console.log(myColor); // 1
     
+You can also assign specific numbers to enum values.
+
+
+any
+
+This type gives up all the features and advantages of TypeScript. So tt should only be used sparingly. 
+
+    let car: any = "BMW";  // any allows us to change to a different type
+    console.log(car);
+    car = { brand: "BMW", series: 3};  // change to object
+    console.log(car);
+
+
+
+nullable types
+
+For example we might want the flexibiliy to clear a value:
+
+    let canBeNull = 12;
+    // later on
+    canBeBull = null;
+
+You can configure TS so that you can define which variables should never be null and which variables can be null.
+
+Within tsconfig.json add the following into compiler options (this is false by default).
+
+    "strictNullChecks": true
+
+The above code snippit would now produce an error: type 'null' is not assignable to type 'number'. However, if you first declare the variable and then assign null no error will appear:
+
+    let canAlsoBeNull;
+    canAlsoBeNull = null; // no error
+
+
+To make the first example work we would have to specifiy null within a union type:
+
+    let canBeNull: number | null = 12;
+    canBeBull = null;
+
+Also note that if you first assign null to a variable, TS will not automatically widen the set of allowed types beyond null. 
+
+    let canBeAny =  null;
+    canBeAny = 12 // error: type 'number' is not assignable to type 'null'.
+
+
+
+
+Functions
+--------------------------------------------
+
+Functions that return nothing use 'void'.
+
+    function sayHello(): void {
+        console.log("hello!");
+    }
+
+Functions are types on their own. 
+
+    function multiply(value1: number, value2: number): number {
+        return value1 * value2;
+    }
+
+    let myMultiply: (val1: number, val2: number) => number;
+    myMultiply = multiply;
+    console.log(myMultiply(5,2));
+
+
+There is a difference between function that ruturn nothing (void) and those that will never return anthing. In the latter case the inferred return type is 'never'.
+
+    function neverReturns(): never {
+        throw new Error('An error');  // always stops and throws an error so never returns anything.
+    }
+
+
+
+
+
+
+Objects
+-----------------------------------------
+
+Object will be automatically turned into a type. However it is not just the type of each value is important but also property names.
+
+    let userData = {
+        name: "max",
+        age: 27
+    }
+
+    userData = {}  // error: type {} is not assignable to type {name: string, age: number}
+
+    userData = {
+        a: "hello",
+        b: 22
+    }  // error: 'a' does not exist in type {name: string, age: number}
+
+
+This is unlike the function case where only the order of the types of the argument values are important. In an object the order is not clear, so the property names step up and provide an indication of structure.
+
+Explicitly providing the type definition:
+
+    userData: {name: string, age: number} = {
+        a: "hello",
+        b: 22
+    }
+
+
+A 'type alias' is something we assign a type to so that we can resuse it as a custom type.
+
+type Complex = {data: number[], output: (all:boolean) => number[]}
+
+The type keyword tells the TS compiler to create a type and assign to the type alias.
+
+
+
+Union Types
+------------------------------------------
+
+For flexibily we can use a single pipe operator.
+
+
 
