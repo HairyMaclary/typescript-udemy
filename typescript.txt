@@ -173,3 +173,45 @@ For flexibily we can use a single pipe operator.
 
 
 
+Compiler
+
+--------------------------------------------
+
+The default behaviour of the compiler is to warn but then go on and transpile to JS.
+
+running $ tsc --init creates a tsconfig.file. Inside this file you'll see various options.
+
+    modules -  the format you with wish to resolve your modules
+    target - the target version of JS, eg es6. es5 is the default because it runs in more browsers.
+
+
+
+Anyway, to stop trasnpiation on an error use this option:
+
+    "noEmitOnError": true,
+
+
+If the sourceMap option is true the compiler will make a .map file next to the .js file. This allows the associated ts file to be used in the dev tools, including denugging with break points.
+
+    "sourceMap": true
+
+If you set noImplicitAny to true then you wont get away with loose variable declarations:
+
+    let anything; // error: variable 'anything' implicitily has an 'any' type.
+
+
+You can also chain compiler options into your tsc call with double hyphen
+
+    $ tsc --noImplicitAny
+
+You might also consider noUnusedParameters and strictNullChecks to write cleaner code. noUnusedParameters will not allow you to specify parameter for a function that are not used. strictNullChecks will not allow you to return a value that has only been declared and not initialised. For example you might not have considered all branches in a function.
+
+    function controlMe(isTrue: boolean) {
+        let result: number;
+        if (isTrue) {
+            resuult = 12;
+        }
+        return result; // strictNullChecks will complain about this undefined value being return.
+    }
+
+
