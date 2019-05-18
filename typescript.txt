@@ -125,6 +125,15 @@ There is a difference between function that ruturn nothing (void) and those that
         throw new Error('An error');  // always stops and throws an error so never returns anything.
     }
 
+We can combine tuples and the rest operator. These two functions are equivalent:
+
+    function printInfo(name: string, age: number) {
+        console.log('My name is ' + name + ' and I am ' + age + ' years old!');
+    }
+
+    function printInfo(...info: [string, number]) {
+        console.log('My name is ' + info[0] + ' and I am ' + info[1] + ' years old!');
+    }
 
 
 
@@ -215,3 +224,26 @@ You might also consider noUnusedParameters and strictNullChecks to write cleaner
     }
 
 
+
+
+Classes
+---------------------------------------
+
+In TS you can create class properties just by listing them out in teh class body. You don't need to put them in a constructor with the 'this' keyword.
+
+class Person {
+
+    name: string  // the default accessibility is public i.e. this is 'public name: string'
+    private type: string; 
+    protected age: number ; // not public but accessible from classes that inherit from this class (child classes)
+
+    // if you do need to assign some arguments to properties then use the constructor
+    // the 2nd argument here is shortcut way of creating a property
+    contructor(name: string, public userName: string) {
+        this.name = name; // this.name is the property and name (RHS) is the argument passed in
+    }
+}
+
+Class are used by instantiating them, which creates an object. 
+
+const person = new Person('Max', 'max');
