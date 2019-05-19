@@ -242,8 +242,183 @@ class Person {
     contructor(name: string, public userName: string) {
         this.name = name; // this.name is the property and name (RHS) is the argument passed in
     }
+
+    // using methods to access to private properties
+    printAge() {
+        console.log(this.age);
+    }
+    setType(type: string) {
+        this.type = type;
+        console.log(this.type);
+    }
+
 }
 
 Class are used by instantiating them, which creates an object. 
 
-const person = new Person('Max', 'max');
+    const person = new Person('Max', 'max');
+
+Use the extends keyword to inherit from a class (In the past we would have used object.create() to use one object as the prototype of another).
+
+    class Max extends Person {
+        name = "Max";
+    }
+
+    const person = new Person('Anna', 'max'); // need both arguments to satisfy the constructor in the parent class
+    console.log(person.name);  // Max - the name we supplied in the child overrides the parent's property
+
+While this case show's a property override, the normal case is to call the parent's constructor with super:
+
+    class Max extends Person {
+        
+        constructor(userName: string) {
+            super('Max', userName);
+            this.age = 31; 
+        }
+    }
+
+You can also make methods private and public.
+
+// getters and setters
+
+These allow you to run some code before getting or setting a value.
+
+Let's say we want to set a species but it must have at least three characters.
+
+    class Plant {
+        private _species: string = "default";
+
+        get species() {
+            return this._species;
+        }
+
+        set species(value: string) {
+            if(value.length > 3) {
+                this._species = value;
+            } else {
+                this.species = "default";
+            }
+        }
+    }
+
+In the past setter and getters would have looked like this:
+
+    var person = {
+        _firstName: ""
+    };
+    Object.defineProperty(person, "firstName", {
+        get: function () {
+            return this._firstName;
+        },
+        set: function (value) {
+            if (value.length > 3) {
+                this._firstName = value;
+            }
+            else {
+                this._firstName = "";
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+
+
+Static Properties and methods
+
+    class Helpers {
+        static PI: number = 3.14;
+
+        static calcCircumference( diameter: number): number {
+            return this.PI * diameter;
+        }
+    }
+
+    // now works without the instantiation of an object from the class 
+    console.log(2 * Helpers.PI);
+    console.log(Helpers.calcCircumference(8));
+
+
+Abstract Classes
+
+Abstract classes cannot be instantiated directly. You must always inherit from them. This may be useful when you need a class to provide a basic set up for other classes to inherit from, but is too basic to be used on it's own.
+
+You can also create abstract methods. These do not have curly braces, aka a function body. 
+
+    abstract class Project {
+        projectName: string = "default";
+        budget: number = 1000;
+
+        // once you extend this class you are required to implement this method
+        abstract changeName(name: string): void;
+
+        calcBudget() {
+            return this.budget * 2;
+        }
+    }
+
+
+Private Constructors and Singletons
+
+class OnlyOne {
+    // static yet private
+    private static instance: OnlyOne;
+    
+    // private constructor: can't instantiate from outside the class declaration
+    private constructor(public name: string) {}
+    
+    static getInstance() {
+        if(!OnlyOne.instance) {
+            OnlyOne.instance = new OnlyOne('The Only One');
+        }
+        return OnlyOne.instance;
+    }
+}
+
+// Error: Constructor of class 'OnlyOne' is private and only accessible within the class declaration.
+//let wrong = new OnlyOne('The Only One');
+
+// Checks if we have an instance. If not, this creates an instance.
+let right = OnlyOne.getInstance();
+console.log(right);  // Object { name: "The Only One" }
+right = OnlyOne.getInstance();
+console.log(right); // Object { name: "The Only One" }
+
+
+
+Readonly properties
+
+In the above example we could still change the property 'name'. 
+
+    right.name = "something else";
+
+If you only supply a getter and not a setter, then the property is read only. A short cut is to specify the 'readonly' keyword in the property declaration. 
+
+    private constructor(public readonly name: string) {}
+
+
+
+Namespaces and Modules
+------------------------------------------
+
+In more complicated projects we need to break up our files. TS supports modular code with tow key concepts; namespaces and modules. 
+
+Namespaces allow us to group related code, and also avoid the duplication of names (naming collisions). They look a little like a JS object. Here we group some math-related code together, and in doing so pull it out of the global scope (less global scope pollution).
+
+    namespace MyMath {
+        const PI = 3.142;
+        
+        export function calcCirc(diam: number): number {
+            return diam * PI;
+        }
+
+        export function calcRecArea(width: number, height: number): number {
+            return width * height;
+        }
+    }
+
+    const PI = 3.1419; // no redeclaration error
+    console.log(MyMath.calcRecArea(10,20));
+
+
+
