@@ -401,7 +401,7 @@ If you only supply a getter and not a setter, then the property is read only. A 
 Namespaces and Modules
 ------------------------------------------
 
-In more complicated projects we need to break up our files. TS supports modular code with tow key concepts; namespaces and modules. 
+In more complicated projects we need to break up our files. TS supports modular code with two key concepts; namespaces and modules. 
 
 Namespaces allow us to group related code, and also avoid the duplication of names (naming collisions). They look a little like a JS object. Here we group some math-related code together, and in doing so pull it out of the global scope (less global scope pollution).
 
@@ -419,6 +419,171 @@ Namespaces allow us to group related code, and also avoid the duplication of nam
 
     const PI = 3.1419; // no redeclaration error
     console.log(MyMath.calcRecArea(10,20));
+
+Namespaces with the same name are automatically combined. For example you might split the above MyMath namespace into two files. Logically it might make sense to break up into rectangular functions and circle functions. As long as you import both files then any code reliant on this namespace will continue to work. 
+
+This is, however, cumbersome. The compiler can bundle these two files into one file. Use the $tsc --outFile command, specifying the file you want to bundle together. EG, if my main js file is app.js, then:
+
+    $ tsc --outFile app.js circleMath.ts rectangleMath.ts app.ts
+
+You will then only need to import app.js into your webpage in script tags. 
+
+Another to import namespace files directly into a .ts file is to a triple slash. Eg at the top of app.ts add:
+
+    /// <reference path="circleMath.ts" />
+    /// <reference path="rectangleMath.ts" />
+
+if you run tsc then these files will be compiled into app.js in the order yo have supplied them.
+
+    $ tsc app.ts --outFile app.js
+
+You can place a namespace wihtin a namespace. Like other members of the namespace, the inner namespace needs to be exported.
+
+
+    namespace MyMath {
+
+        namespace Circle {
+            export function calcCirc(diam: number): number {
+                return diam * PI;
+            }
+        }
+        const PI = 3.142;
+
+        export function calcRecArea(width: number, height: number): number {
+            return width * height;
+        }
+    }
+
+To now use calcCirc we would have to use MyMath.Circle.calcCirc. Or, after importing the MyMath namespace we could just create an alias for the Cirlce namespace:
+
+    import CircleMath = MyMath.Cirlce;
+
+Namespaces tend to be less declarative about dependcies, so tend to be used on smaller projects. In larger projects modules are often used.
+
+For TS modules just place the export keyword at the beginning of a declaration. Then import the file:
+
+    import { thing } from './thingsFile'; // no curly braces if a default: you also get to supply an alias
+
+Leave out the .ts in the relative path.
+
+While the TS compiler can be set to use a variety of module systems (commonJS, AMD, es6) we need need a module loader. Sysetem.js is one such loader.
+
+    npm install --save systemjs@0.21.5
+
+A module loader provides the logic to deal with the commands that the module systems use. Eg, a browser will not understand keywords like require or export, as used in CommonJS/nodejs. 
+
+In index.html replace this line in the head:
+
+    <script src="app.js"></script>
+
+with
+
+    <script src="node_modules/systemjs/dist/system.js"></script>
+
+And at this script tag in the body:
+
+
+
+{
+
+Summary from https://auth0.com/blog/javascript-module-systems-showdown/ :
+
+So within tsconfig compiler options there is the "module" property. This refers to module system, which organises dependencies and prevents naming collisions. As JS has become more comlicated there have been various module systems have been developed, such as commonJS, AMD, ES2015. Originally, in client side JS development, the developer, had to make sure all the dependencies are available and in the correct order. This would mean lots of script tags in the correct order.  
+
+Another old pattern was the Revealing Module Pattern:
+
+    var myRevealingModule = (function () {
+        var privateVar = "Ben Cherry",
+            publicVar = "Hey there!";
+
+        function privateFunction() {
+            console.log( "Name:" + privateVar );
+        }
+
+        function publicSetName( strName ) {
+            privateVar = strName;
+        }
+
+        function publicGetName() {
+            privateFunction();
+        }
+
+        // Reveal public pointers to
+        // private functions and properties
+        return {
+            setName: publicSetName,
+            greeting: publicVar,
+            getName: publicGetName
+        };
+    })();
+
+    myRevealingModule.setName( "Paul Kinlan" );
+
+
+This pattern relies on bindings being declared within functions to encapsulate private contents. That is, declarations are are protected by the function scope enclosing them. You can also seen that public symbols are exposed in the returned dictionary. 
+
+Overall this pattern deals with encapsulation but not so well with dependancy management.
+
+CommonJS was a project to address modules. While it was not adopted by node.js, both systems are similar. Both use a require function. The parameter passed to require is the id of the module. In Node's implementation, it is the name of the module inside the node_modules directory. 
+
+Both systems also use exports as a special object: anything put in it will get exported as a public element. 
+
+However, in Node, module.exports is the special object that gets exported, while exports is just a variable that gets bound by default to module.exports. CommonJS, on the other hand, has no module.exports object. So, for node you must use module.exports. 
+
+Two popular commonJS options are webpack and browserfy. A downside with much of these systems are synchronous behaviour, which is bad in a browser. 
+
+Async loading was addressed in a break away from commonJS: Asynchronous Module Definition (AMD). To common implementations are require.js and Dojo. Asynchronous loading is made possible by using JavaScript's traditional closure idiom: a function is called when the requested modules are finished loading. 
+
+In ES2015 (es6) async and sync module loading was addressed. 
+
+    //------ lib.js ------
+    export const sqrt = Math.sqrt;
+    export function square(x) {
+        return x * x;
+    }
+    export function diag(x, y) {
+        return sqrt(square(x) + square(y));
+    }
+
+    //------ main.js ------
+    import { square, diag } from 'lib';
+    console.log(square(11)); // 121
+    console.log(diag(4, 3)); // 5
+
+The static nature of the import and export directive allows static analyzers to build a full tree of dependencies without running code. In truth, ES2015 only specifies the syntax for static module loaders. In practice, ES2015 implementations are not required to do anything after parsing these directives. Module loaders such as System.js are still required. A new specification is being considered.
+
+Also this system is lacking native support in many browsers and node. Transpilers like Babel are needed.
+
+system.js is a one stop system for handing all these other module systems, transpilers, and environments.
+
+    <script src="system.js"></script>
+    <script>
+      // set our baseURL reference path
+      System.config({
+        baseURL: '/app',
+        // or 'traceur' or 'typescript'
+        transpiler: 'babel',
+        // or traceurOptions or typescriptOptions
+        babelOptions: {
+
+        }
+      });
+
+      // loads /app/main.js
+      System.import('main.js');
+    </script>
+
+As System.js does all the job on-the-fly, using ES2015 modules should generally be left to a transpiler during the build step in production mode. When not in production mode, System.js can call the transpiler for you, providing seamless transition between production and debugging environments.
+
+}
+
+ 
+
+
+
+
+
+
 
 
 
