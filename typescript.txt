@@ -119,7 +119,7 @@ Functions are types on their own.
     console.log(myMultiply(5,2));
 
 
-There is a difference between function that ruturns nothing (void) and those that will never return anthing. In the latter case the inferred return type is 'never'.
+There is a difference between a function that returns nothing (void) and those that will never return anything. In the latter case the inferred return type is 'never'.
 
     function neverReturns(): never {
         throw new Error('An error');  // always stops and throws an error so never returns anything.
@@ -621,10 +621,38 @@ Interfaces can also inherit. Say we want an aged person to have all the named pe
 
 Interfaces are only there to check code during compliation. They are totally removed when the code is transformed to js. 
 
+Decorators
+--------------------------------------------------
+
+Decorators are functions you can attach to classes, methods, and properties. Decorators then allow you to work with these things or extend or modify them. It is a kind of meta programming. 
+
+Decorators are basically functions. They get one argument from Typescript, which is mananged by Typescript. For a class decorator the argument you should expect for your decorator function the constructor function from the class. 
+
+    function logged(constructorFn: Function) {
+        console.log(constructorFn);
+    }
+
+    @logged
+    class Person {
+        constructor() {
+            console.log('Hi');
+        }
+    }
+
+This logs out 'Hi' even though we have not newed up an instance of person.
+
+We can also create factory functions that return back a decorator function after processing some other logic.
 
 
+    function logging(value: boolean): ( Function | null) {
+        return value ? logged : null;
+    }
 
-
-
-
+    // logging is not a decorator. We execute it and then a valid decorator is returned and 'attached'.
+    @logging(true)
+    class Car {
+        constructor() {
+            console.log('Hello from a car');
+        }
+    }
 
