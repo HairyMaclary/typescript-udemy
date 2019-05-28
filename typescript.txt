@@ -138,7 +138,6 @@ We can combine tuples and the rest operator. These two functions are equivalent:
 
 
 
-
 Objects
 -----------------------------------------
 
@@ -621,6 +620,139 @@ Interfaces can also inherit. Say we want an aged person to have all the named pe
 
 Interfaces are only there to check code during compliation. They are totally removed when the code is transformed to js. 
 
+
+Generics
+----------------------------------------
+
+Generics, or generalising the type, allows you to use dynamic and flexible code and yet still be able to check the type,
+
+    function echo<T>(data: T) { return data;}
+
+    console.log(echo("max").length) // autocomplete works for length; length is a property for strings
+    console.log(echo<string>("max").length) // more explicit version
+    console.log(echo(27).length) // IDE and TS compiler both complain about length 
+
+All members of an Array can be of one type:
+
+    const testResults: Array<number> = [1.94, 2.33];
+
+
+Generic array arguments:
+
+    function printAll<T>(args: T[]) {
+        args.forEach(
+            //...
+        )
+    }
+
+Generic types:
+
+    const echo2: <T>(data: T) => T = echo;  // everything after the colon but before = is the declared type.
+
+Generic classes:
+
+This code will still cause a compiler error:
+
+    class SimpleMath<T> {
+        baseValue: T;
+        multiplyValue: T;
+        calculate(): number {
+            return this.baseValue * this.multiplyValue;
+        }
+    }
+
+    const simpleMath = new SimpleMath();
+    simpleMath.baseValue = 10;
+    simpleMath.multiplyValue = 20;
+    console.log(simpleMath.calculate());
+
+This is because even though the values we have chosen would work well in caclulate and produce a number, the compiler will complain that types other than number could also be passed in.
+
+(you can override/coerce with plus symbols: return +this.baseValue * +this.multiplyValue; )
+
+The above class will work better if we use the extends keyword. This contrains the generic types allowed. 
+
+    class SimpleMath<T extends number | string> {
+        baseValue: T;
+        multiplyValue: T;
+        calculate(): number {
+            return this.baseValue * this.multiplyValue;
+        }
+    }
+
+    const simpleMath = new SimpleMath<number>();
+    simpleMath.baseValue = 10;
+    simpleMath.multiplyValue = 20;
+    console.log(simpleMath.calculate());
+
+
+What is we wanted more than one generic type for one object? Eg, say we wanted, in the above example, one value to be a string and the other to be a number.
+
+If both values must be the same type then:
+
+    class SimpleMath<T extends U, U extends number | string> {
+        baseValue: T;
+        multiplyValue: U;
+        // ...
+    }
+
+Or to mix the types:
+
+    class SimpleMath<T extends number | string, U extends number | string> {
+        baseValue: T;
+        multiplyValue: U;
+        // ...
+    }
+
+
+(T and U are just conventions. You can use anything you like).
+
+Example: recreating a map using a two dimensional array:
+
+
+    class MyMap<T> {
+
+        private mapArray: (string | T)[][] = [];
+
+        setItem(key: string, item: T) {
+            const entry = [key, item];
+            this.mapArray.push(entry);
+        }
+
+        getItem(key: string) {
+            return this.mapArray.find( (element) => element[0] === key );
+        }
+
+        clear() {
+            this.mapArray = [];
+        }
+
+        printMap() {
+            this.mapArray.forEach(
+                element => console.log(element[0], element[1])
+            );
+        }
+    }
+
+    const numberMap = new MyMap<number>();
+    numberMap.setItem('apples', 5);
+    numberMap.setItem('bananas', 10);
+    numberMap.printMap();
+    
+    const stringMap = new MyMap<string>();
+    stringMap.setItem('name', "Max");
+    stringMap.setItem('age', "27");
+    stringMap.printMap();
+
+Another way of doing this is to have an object holding arrays, which would look like:
+
+    private mapArray: {[key: string: T]} = {};    
+    function logged(constructorFn: Function) {
+        console.log(constructorFn);
+    }
+
+
+
 Decorators
 --------------------------------------------------
 
@@ -628,9 +760,6 @@ Decorators are functions you can attach to classes, methods, and properties. Dec
 
 Decorators are basically functions. They get one argument from Typescript, which is mananged by Typescript. For a class decorator the argument you should expect for your decorator function the constructor function from the class. 
 
-    function logged(constructorFn: Function) {
-        console.log(constructorFn);
-    }
 
     @logged
     class Person {
