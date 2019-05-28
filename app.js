@@ -5,30 +5,73 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 function logged(constructorFn) {
     console.log(constructorFn);
 }
 //Think of the '@' as 'attach' a funciton
-var Person = /** @class */ (function () {
-    function Person() {
+let Person = class Person {
+    constructor() {
         console.log('Hi');
     }
-    Person = __decorate([
-        logged
-    ], Person);
-    return Person;
-}());
+};
+Person = __decorate([
+    logged,
+    __metadata("design:paramtypes", [])
+], Person);
+const fdec = function (target) {
+    console.log('target 0 :', target);
+    target.bar = 3;
+    return target;
+};
+const fdec2 = function () {
+    console.log('target 1:');
+    return function (target) {
+        console.log('target 2:', target);
+        target.bar = 3;
+        return target;
+    };
+};
+let Foo = class Foo {
+};
+Foo = __decorate([
+    fdec,
+    fdec2()
+], Foo);
+console.log(Foo.bar);
+console.log(new Foo());
 function logging(value) {
-    return value ? logged : null;
+    return value ? logged : () => { };
 }
 // logging is not a decorator. We execute it and then a valid decorator is returned and 'attached'.
-var Car = /** @class */ (function () {
-    function Car() {
+let Car = class Car {
+    constructor() {
         console.log('Hello from a car');
     }
-    Car = __decorate([
-        logged
-    ], Car);
-    return Car;
-}());
+};
+Car = __decorate([
+    logging(true),
+    __metadata("design:paramtypes", [])
+], Car);
+function MyClassDecorator() {
+    return function (target) {
+        Object.seal(target);
+        Object.seal(target.prototype);
+        //console.log(target);
+    };
+}
+let Greeter = class Greeter {
+    constructor(message) {
+        this.greeting = message;
+    }
+    greet() {
+        return "Hello, " + this.greeting;
+    }
+};
+Greeter = __decorate([
+    MyClassDecorator(),
+    __metadata("design:paramtypes", [String])
+], Greeter);
 //# sourceMappingURL=app.js.map

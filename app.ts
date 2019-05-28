@@ -11,8 +11,33 @@ class Person {
     }
 }
 
-function logging(value: boolean): ( Function | null) {
-    return value ? logged : null;
+const fdec = function(target:any){
+    console.log('target 0 :', target);
+    target.bar = 3;
+    return target;
+  };
+  
+  const fdec2 = function(){
+    console.log('target 1:');
+    return function(target:any){
+      console.log('target 2:', target);
+      target.bar = 3;
+      return target;
+    }
+  };
+  
+  @fdec
+  @fdec2()
+  class Foo {
+    static bar: number
+  }
+  
+  
+  console.log(Foo.bar);
+  console.log(new Foo());
+
+function logging(value: boolean) {
+    return value ? logged : ()=>{};
 }
 
 // logging is not a decorator. We execute it and then a valid decorator is returned and 'attached'.
@@ -20,5 +45,28 @@ function logging(value: boolean): ( Function | null) {
 class Car {
     constructor() {
         console.log('Hello from a car');
+    }
+}
+
+
+
+function MyClassDecorator() {
+    return function (target: Function) {
+        Object.seal(target);
+        Object.seal(target.prototype);
+        //console.log(target);
+    };
+}
+
+@MyClassDecorator()
+class Greeter {
+    greeting: string;
+
+    constructor(message: string) {
+        this.greeting = message;
+    }
+
+    greet() {
+        return "Hello, " + this.greeting;
     }
 }
