@@ -8,32 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-class MyMap {
-    constructor() {
-        this.mapArray = [];
-    }
-    setItem(key, item) {
-        const entry = [key, item];
-        this.mapArray.push(entry);
-    }
-    getItem(key) {
-        return this.mapArray.find((element) => element[0] === key);
-    }
-    clear() {
-        this.mapArray = [];
-    }
-    printMap() {
-        this.mapArray.forEach(element => console.log(element[0], element[1]));
-    }
-}
-const numberMap = new MyMap();
-numberMap.setItem('apples', 5);
-numberMap.setItem('bananas', 10);
-numberMap.printMap();
-const stringMap = new MyMap();
-stringMap.setItem('name', "Max");
-stringMap.setItem('age', "27");
-stringMap.printMap();
 function logged(constructorFn) {
     console.log(constructorFn);
 }
@@ -47,27 +21,6 @@ Person = __decorate([
     logged,
     __metadata("design:paramtypes", [])
 ], Person);
-const fdec = function (target) {
-    console.log('target 0 :', target);
-    target.bar = 3;
-    return target;
-};
-const fdec2 = function () {
-    console.log('target 1:');
-    return function (target) {
-        console.log('target 2:', target);
-        target.bar = 3;
-        return target;
-    };
-};
-let Foo = class Foo {
-};
-Foo = __decorate([
-    fdec,
-    fdec2()
-], Foo);
-console.log(Foo.bar);
-console.log(new Foo());
 function logging(value) {
     return value ? logged : () => { };
 }
@@ -81,23 +34,50 @@ Car = __decorate([
     logging(true),
     __metadata("design:paramtypes", [])
 ], Car);
-function MyClassDecorator() {
-    return function (target) {
-        Object.seal(target);
-        Object.seal(target.prototype);
-        //console.log(target);
+function printable(constructorFn) {
+    constructorFn.prototype.print = function () {
+        console.log(this);
     };
 }
-let Greeter = class Greeter {
-    constructor(message) {
-        this.greeting = message;
-    }
-    greet() {
-        return "Hello, " + this.greeting;
+let Plant = class Plant {
+    constructor() {
+        this.name = "Green Plant";
     }
 };
-Greeter = __decorate([
-    MyClassDecorator(),
-    __metadata("design:paramtypes", [String])
-], Greeter);
+Plant = __decorate([
+    logging(true),
+    printable
+], Plant);
+const plant = new Plant();
+// forced to cast due to typescript bug
+plant.print();
+// Decorator Factory
+function editable(value) {
+    return function (target, propName, descriptor) {
+        target;
+        propName;
+        descriptor.writable = value;
+    };
+}
+class Project {
+    constructor(name) {
+        this.projectName = name;
+    }
+    // want to add some meta data to this method to make it non-overwritable
+    calcBudget() {
+        console.log(1000);
+    }
+}
+__decorate([
+    editable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], Project.prototype, "calcBudget", null);
+const project = new Project("Super Project");
+project.calcBudget();
+project.calcBudget = function () {
+    console.log(2000);
+};
+project.calcBudget();
 //# sourceMappingURL=app.js.map

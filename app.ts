@@ -1,38 +1,4 @@
 
-class MyMap<T> {
-
-    private mapArray: (string | T)[][] = [];
-
-    setItem(key: string, item: T) {
-        const entry = [key, item];
-        this.mapArray.push(entry);
-    }
-
-    getItem(key: string) {
-        return this.mapArray.find( (element) => element[0] === key );
-    }
-
-    clear() {
-        this.mapArray = [];
-    }
-
-    printMap() {
-        this.mapArray.forEach(
-            element => console.log(element[0], element[1])
-        );
-    }
-}
-
-const numberMap = new MyMap<number>();
-numberMap.setItem('apples', 5);
-numberMap.setItem('bananas', 10);
-numberMap.printMap();
- 
-const stringMap = new MyMap<string>();
-stringMap.setItem('name', "Max");
-stringMap.setItem('age', "27");
-stringMap.printMap();
-
 function logged(constructorFn: Function) {
     console.log(constructorFn);
 }
@@ -44,31 +10,6 @@ class Person {
         console.log('Hi');
     }
 }
-
-const fdec = function(target:any){
-    console.log('target 0 :', target);
-    target.bar = 3;
-    return target;
-  };
-  
-  const fdec2 = function(){
-    console.log('target 1:');
-    return function(target:any){
-      console.log('target 2:', target);
-      target.bar = 3;
-      return target;
-    }
-  };
-  
-  @fdec
-  @fdec2()
-  class Foo {
-    static bar: number
-  }
-  
-  
-  console.log(Foo.bar);
-  console.log(new Foo());
 
 function logging(value: boolean) {
     return value ? logged : ()=>{};
@@ -83,24 +24,52 @@ class Car {
 }
 
 
-function MyClassDecorator() {
-    return function (target: Function) {
-        Object.seal(target);
-        Object.seal(target.prototype);
-        //console.log(target);
-    };
-}
-
-@MyClassDecorator()
-class Greeter {
-    greeting: string;
-
-    constructor(message: string) {
-        this.greeting = message;
-    }
-
-    greet() {
-        return "Hello, " + this.greeting;
+function printable(constructorFn: Function) {
+    constructorFn.prototype.print = function() {
+        console.log(this);
     }
 }
 
+@logging(true)
+@printable
+class Plant {
+    name = "Green Plant"
+}
+
+const plant = new Plant();
+
+// forced to cast due to typescript bug
+(<any>plant).print();
+
+
+
+// Decorator Factory
+function editable(value: boolean) {
+
+    return function(target: any, propName: string, descriptor: PropertyDescriptor) {
+        target;
+        propName;
+        descriptor.writable = value;
+    }
+}
+
+class Project {
+    projectName: string;
+
+    constructor(name: string) {
+        this.projectName = name;
+    }
+
+    // want to add some meta data to this method to make it non-overwritable
+    @editable(false)
+    calcBudget() {
+        console.log(1000);
+    }
+}
+
+const project = new Project("Super Project");
+project.calcBudget();
+project.calcBudget = function() {
+    console.log(2000);
+};
+project.calcBudget();
