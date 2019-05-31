@@ -824,13 +824,10 @@ In this example we want to add some meta data to this method to make it non-over
 
 
     function editable(value: boolean) {
-
-    return function(target: any, propName: string, descriptor: PropertyDescriptor) {
-        target;
-        propName;
-        descriptor.writable = value;
+        return function(target: any, propName: string, descriptor: PropertyDescriptor) {
+            descriptor.writable = value;
+        }
     }
-}
 
     class Project {
         projectName: string;
