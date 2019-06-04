@@ -57,13 +57,12 @@ You can also assign specific numbers to enum values.
 
 any
 
-This type gives up all the features and advantages of TypeScript. So tt should only be used sparingly. 
+This type gives up all the features and advantages of TypeScript. So it should only be used sparingly. 
 
     let car: any = "BMW";  // any allows us to change to a different type
     console.log(car);
     car = { brand: "BMW", series: 3};  // change to object
     console.log(car);
-
 
 
 nullable types
@@ -96,6 +95,16 @@ Also note that if you first assign null to a variable, TS will not automatically
     let canBeAny =  null;
     canBeAny = 12 // error: type 'number' is not assignable to type 'null'.
 
+
+Type assertions (aka cast):
+
+This is a way to tell TS an expression's type when you know better than the type checker. 
+
+    document.getElementById('root') as HTMLElement
+
+The reason we need to do so in this case is that getElementById's return type is HTMLElement | null. Put simply, getElementById returns null when it can't find an element with a given id. We're assuming that getElementById will actually succeed, so we need to convince TypeScript of that using the as syntax.
+
+TypeScript also has a trailing "bang" syntax (!), which removes null and undefined from the prior expression. So we could have written document.getElementById('root')!, but in this case we wanted to be a bit more explicit.
 
 
 
@@ -193,13 +202,12 @@ running $ tsc --init creates a tsconfig.file. Inside this file you'll see variou
     target - the target version of JS, eg es6. es5 is the default because it runs in more browsers.
 
 
-
-Anyway, to stop trasnpiation on an error use this option:
+Anyway, to stop transpilation on an error use this option:
 
     "noEmitOnError": true,
 
 
-If the sourceMap option is true the compiler will make a .map file next to the .js file. This allows the associated ts file to be used in the dev tools, including denugging with break points.
+If the sourceMap option is true the compiler will make a .map file next to the .js file. This allows the associated ts file to be used in the dev tools, including debugging with break points.
 
     "sourceMap": true
 
@@ -224,14 +232,12 @@ You might also consider noUnusedParameters and strictNullChecks to write cleaner
 
 
 
-
 Classes
 ---------------------------------------
 
-In TS you can create class properties just by listing them out in teh class body. You don't need to put them in a constructor with the 'this' keyword.
+In TS you can create class properties just by listing them out in the class body. You don't need to put them in a constructor with the 'this' keyword.
 
 class Person {
-
     name: string  // the default accessibility is public i.e. this is 'public name: string'
     private type: string; 
     protected age: number ; // not public but accessible from classes that inherit from this class (child classes)
@@ -816,27 +822,43 @@ A more advanced example:
 
 
 
-Method Decorators
+Method and Property Decorators
 
-Instead of taking a constructor function as an argument, this decorator function takes a method target (type any since it could be a static method (resolved to the contructor function) or instantiated (resolves to the prototype of the object)), the name of the property (type string), and the descriptor (type PropertyDescriptor). A property descriptor comes out of vanila JS. One way to add new properties in JS is to use Object.defineProperty(obj, prop, descriptor). The last argument in that signature allows for configuration the property with options like whether or not it is writable (see the MDN docs). 
+Instead of taking a constructor function as an argument, this decorator function takes a method target (type any since it could be a static method (resolved to the contructor function) or instantiated (resolves to the prototype of the object)), the name of the property (type string), and the descriptor (type PropertyDescriptor). A property descriptor comes out of vanila JS in that one way to add new properties in JS is to use Object.defineProperty(obj, prop, descriptor). The last argument in that signature allows for configuration the property with options like whether or not it is writable (see the MDN docs). 
 
-In this example we want to add some meta data to this method to make it non-overwritable.
+Property decorators are different to method decorators. While you would think that they may be similar, TS cannot access properties in the same way it can access methods. That is, there is no property descriptor argument in the decorator's signature. However the function can return the property descriptor. This means that we can set the descriptor but we can't access the existing descriptor. 
 
+In this example we want to add some meta data to a method, calcBudget, to make it non-overwritable. We do this with the editable, which return a mthod decorator.
 
+We also demonstrate a property decorator. It's not very useful in the case (locks up the class), but if it was used on some other logic, lilke enumerability or configerablity of the property, then it might be fine. Often property decorators are better at listening to changes in a property. It can read values and react to changes. 
+
+    // returns a method descriptor
     function editable(value: boolean) {
         return function(target: any, propName: string, descriptor: PropertyDescriptor) {
             descriptor.writable = value;
         }
     }
 
+    // returns a property descriptor
+    function overwritable(value: boolean) {
+    return function(target: any, propName: string): any {
+        target;
+        propName;
+        const newDescriptor: PropertyDescriptor = {
+            writable: value
+        }
+        return newDescriptor;
+    }
+}
+
     class Project {
+        //@overwritable(false)  // breaks the whole class since we can't write to this property in the constuctor
         projectName: string;
 
         constructor(name: string) {
             this.projectName = name;
         }
 
-        // 
         @editable(false)
         calcBudget() {
             console.log(1000);
@@ -849,4 +871,119 @@ In this example we want to add some meta data to this method to make it non-over
         console.log(2000);
     };                         // TypeError: Cannot assign to read only property 'calcBudget' of object
     project.calcBudget();  // never get to this line. Without the decorator it would be 1000
+
+
+
+Parameter decorators can be attached to the parameters passed into methods. 
+
+    // while this is decorator you can still use factories with parameter decorators
+    function printInfo(target: any, methodName: string, paramIndex: number) {
+        console.log('Target: ', target);
+        console.log('Method Name:', methodName, );
+        console.log('Parameter Index:', paramIndex);
+    }
+
+    class Course {
+        name: string;
+
+        constructor(name: string) {
+            this.name= name;
+        }
+
+        printStudentNumbers(mode: string, @printInfo printAll: boolean) {
+            mode;
+            if(printAll) {
+                console.log(10000);
+            } else {
+                console.log(2000);
+            }
+        }
+    }
+
+    const course = new Course('Super Course');
+    course.printStudentNumbers('anything', true);
+    course.printStudentNumbers('anything', false);
+
+    // Target:  Object { … }
+    // Method Name: printStudentNumbers
+    // Parameter Index: 1
+    // 10000
+    // 2000
+
+
+
+Using Javascript Libraries with TypeScript
+
+----------------------------------------------------------
+
+Let's say you have the latest jQuery code in your index file. A simple example in the body:
+
+    <button>Click Me</button>
+    <script
+        src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+    <script>
+        $('button').click(function () {
+            alert('button was clicked')
+        })
+    </script>
+
+However if you placed the same jquery code into your app.ts file the compiler will complain about $ (which is a function that takes a selector). TS will not know where that function came from, and that it has been made available globally.
+
+One non-ideal fix is to use 'declare' at the top of your TS file:
+
+    declare var $: any;
+
+This way passes no information to TS. It does not even know the $ is a function. There will be no useful warnings.
+
+A better way is to install type definitions, which are d.ts files (the d is for declaration). You can make your own declarations or import entire declaration files from 3rd parties. Search 'definitly typed' and the library name. You can also just use npm to install a @types, eg npm install -D @types/jquery. Everything in the @types folder is automatically included into your project. 
+
+
+
+Some Other Compiler Options
+---------------------------------------------------------
+
+When the compiler runs it checks tsconfig to see how it should behave. In addition to the compilerOptions, discuessed above, tsconfig also includes a exclude array. Any folder listed here is ignored by the compiler. However, you can go the other way and replace the exclude array with a files array. Only those files listed will be compiled. However, you wont get an automatic import of declaration files. So you need to explicitly include them in the files array.
+
+    "files": [
+        "app.ts",
+        "typings/index.d.ts"
+    ]
+
+Note, if you just pass one file into the compiler via the command line then agin you wont get typings and it will fail:
+
+    $ tsc app.js --sourceMap    // note the way in which compiler options can be passed into the click
+
+
+Typescript with React 
+------------------------------------
+
+React.Component is a generic class. Generally, you'll create an interface for the props and the state and passin them.
+
+    interface IProps {
+        // ....
+    }
+
+    intergace IState {
+        // ...
+    }
+
+    class myComponent extends React.Component<IProps, IState> {
+        // ...
+    }
+
+For more detail on using react with typescript check out Microsoft on github: https://github.com/microsoft/TypeScript-React-Starter 
+
+
+
+
+
+
+
+
+
+
+
+
 

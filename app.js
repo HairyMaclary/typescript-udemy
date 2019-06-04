@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 function logged(constructorFn) {
     console.log(constructorFn);
 }
@@ -59,6 +62,16 @@ function editable(value) {
         descriptor.writable = value;
     };
 }
+function overwritable(value) {
+    return function (target, propName) {
+        target;
+        propName;
+        const newDescriptor = {
+            writable: value
+        };
+        return newDescriptor;
+    };
+}
 class Project {
     constructor(name) {
         this.projectName = name;
@@ -76,8 +89,42 @@ __decorate([
 ], Project.prototype, "calcBudget", null);
 const project = new Project("Super Project");
 project.calcBudget();
-project.calcBudget = function () {
-    console.log(2000);
-};
-project.calcBudget();
+// project.calcBudget = function() {
+//     console.log(2000);
+// };
+// project.calcBudget();
+// while this is decorator you can still use factories with parameter decorators
+function printInfo(target, methodName, paramIndex) {
+    console.log('Target: ', target);
+    console.log('Method Name:', methodName);
+    console.log('Parameter Index:', paramIndex);
+}
+class Course {
+    constructor(name) {
+        this.name = name;
+    }
+    printStudentNumbers(mode, printAll) {
+        mode;
+        if (printAll) {
+            console.log(10000);
+        }
+        else {
+            console.log(2000);
+        }
+    }
+}
+__decorate([
+    __param(1, printInfo),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Boolean]),
+    __metadata("design:returntype", void 0)
+], Course.prototype, "printStudentNumbers", null);
+const course = new Course('Super Course');
+course.printStudentNumbers('anything', true);
+course.printStudentNumbers('anything', false);
+// Target:  Object { … }
+// Method Name: printStudentNumbers
+// Parameter Index: 1
+// 10000
+// 2000
 //# sourceMappingURL=app.js.map

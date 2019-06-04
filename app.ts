@@ -45,7 +45,6 @@ const plant = new Plant();
 
 // Decorator Factory
 function editable(value: boolean) {
-
     return function(target: any, propName: string, descriptor: PropertyDescriptor) {
         target;
         propName;
@@ -53,7 +52,19 @@ function editable(value: boolean) {
     }
 }
 
+function overwritable(value: boolean) {
+    return function(target: any, propName: string): any {
+        target;
+        propName;
+        const newDescriptor: PropertyDescriptor = {
+            writable: value
+        }
+        return newDescriptor;
+    }
+}
+
 class Project {
+    //@overwritable(false)  // breaks the whole class since we can't write to this property in the constuctor
     projectName: string;
 
     constructor(name: string) {
@@ -69,7 +80,41 @@ class Project {
 
 const project = new Project("Super Project");
 project.calcBudget();
-project.calcBudget = function() {
-    console.log(2000);
-};
-project.calcBudget();
+// project.calcBudget = function() {
+//     console.log(2000);
+// };
+// project.calcBudget();
+
+// while this is decorator you can still use factories with parameter decorators
+function printInfo(target: any, methodName: string, paramIndex: number) {
+    console.log('Target: ', target);
+    console.log('Method Name:', methodName, );
+    console.log('Parameter Index:', paramIndex);
+}
+
+class Course {
+    name: string;
+
+    constructor(name: string) {
+        this.name= name;
+    }
+
+    printStudentNumbers(mode: string, @printInfo printAll: boolean) {
+        mode;
+        if(printAll) {
+            console.log(10000);
+        } else {
+            console.log(2000);
+        }
+    }
+}
+
+const course = new Course('Super Course');
+course.printStudentNumbers('anything', true);
+course.printStudentNumbers('anything', false);
+
+// Target:  Object { … }
+// Method Name: printStudentNumbers
+// Parameter Index: 1
+// 10000
+// 2000
