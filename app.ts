@@ -35,7 +35,7 @@ const collectAverage = (): void => {
         let turns = runGame();
         testRunCount--;
         if (typeof turns === 'number') results.push(turns);
-        else throw new Error('non numberical result returned from runGame()');
+        else throw new Error('non numerical result returned from runGame()');
     }
 
     if (results.length) {

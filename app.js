@@ -34,7 +34,7 @@ const collectAverage = () => {
         if (typeof turns === 'number')
             results.push(turns);
         else
-            throw new Error('non numberical result returned from runGame()');
+            throw new Error('non numerical result returned from runGame()');
     }
     if (results.length) {
         const sum = results.reduce(function (a, b) { return a + b; });
