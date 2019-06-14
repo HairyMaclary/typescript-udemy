@@ -30,9 +30,11 @@ const collectAverage = () => {
     let avg;
     while (testRunCount > 0) {
         let turns = runGame();
+        testRunCount--;
         if (typeof turns === 'number')
             results.push(turns);
-        testRunCount--;
+        else
+            throw new Error('non numberical result returned from runGame()');
     }
     if (results.length) {
         const sum = results.reduce(function (a, b) { return a + b; });

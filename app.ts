@@ -10,7 +10,7 @@ const isMatch = (pairCount: number): boolean => {
     else return false;
 }
 
-const runGame = () => {
+const runGame = (): number => {
 
     let pairsRemaining = 26;
     let count = 0;
@@ -25,7 +25,7 @@ const runGame = () => {
     return count;
 }
 
-const collectAverage = ():void => {
+const collectAverage = (): void => {
 
     let testRunCount = 100000;
     let results: number[] = [];
@@ -33,8 +33,9 @@ const collectAverage = ():void => {
 
     while (testRunCount > 0) {
         let turns = runGame();
-        if(typeof turns === 'number') results.push(turns);
         testRunCount--;
+        if (typeof turns === 'number') results.push(turns);
+        else throw new Error('non numberical result returned from runGame()');
     }
 
     if (results.length) {
