@@ -762,10 +762,13 @@ Another way of doing this is to have an object holding arrays, which would look 
 Decorators
 --------------------------------------------------
 
-Decorators are functions you can attach to classes, methods, and properties. Decorators then allow you to work with these things or extend or modify them. It is a kind of meta programming. 
+Decorators are functions you can attach to classes, methods, and properties. Decorators then allow you to work with extend or modify these entities. It is a kind of meta programming. 
 
-Decorators are basically functions. They get one argument from Typescript, which is mananged by Typescript. For a class decorator the argument you should expect for your decorator function is the constructor function  for an object (i.e. what you are really are dealing wiht behind the syntactic sugar of class syntax). 
+Decorators are basically functions. They get one argument from Typescript, which is mananged by Typescript. For a class decorator the argument you should expect for your decorator function is the constructor function for an object (i.e. what you are really are dealing with behind the syntactic sugar of class syntax). 
 
+    function logged(constructorFn: Function) {
+        console.log(constructorFn); // logs out the constructor function without having to 'new up' a Person object
+    }
 
     @logged
     class Person {
@@ -773,8 +776,6 @@ Decorators are basically functions. They get one argument from Typescript, which
             console.log('Hi');
         }
     }
-
-This logs out 'Hi' even though we have not newed up an instance of person.
 
 We can also create decorator factory functions, which return back a decorator function after processing some other logic.
 
@@ -824,7 +825,7 @@ A more advanced example:
 
 Method and Property Decorators
 
-Instead of taking a constructor function as an argument, this decorator function takes a method target (type any since it could be a static method (resolved to the contructor function) or instantiated (resolves to the prototype of the object)), the name of the property (type string), and the descriptor (type PropertyDescriptor). A property descriptor comes out of vanila JS in that one way to add new properties in JS is to use Object.defineProperty(obj, prop, descriptor). The last argument in that signature allows for configuration the property with options like whether or not it is writable (see the MDN docs). 
+Instead of taking a constructor function as an argument, this decorator function takes a method target (type 'any' since it could be a static method (resolved to the contructor function) or instantiated (resolves to the prototype of the object)), the name of the property (type string), and the descriptor (type PropertyDescriptor). A property descriptor comes out of vanila JS in that one way to add new properties in JS is to use Object.defineProperty(obj, prop, descriptor). The last argument in that signature allows for configuration the property with options like whether or not it is writable (see the MDN docs). 
 
 Property decorators are different to method decorators. While you would think that they may be similar, TS cannot access properties in the same way it can access methods. That is, there is no property descriptor argument in the decorator's signature. However the function can return the property descriptor. This means that we can set the descriptor but we can't access the existing descriptor. 
 
@@ -959,7 +960,7 @@ Note, if you just pass one file into the compiler via the command line then agin
 Typescript with React 
 ------------------------------------
 
-React.Component is a generic class. Generally, you'll create an interface for the props and the state and passin them.
+React.Component is a generic class. Generally, you'll create an interface for the props and the state and pass them in.
 
     interface IProps {
         // ....
