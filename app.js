@@ -1,48 +1,17 @@
 "use strict";
-const chanceSame = (numPairs) => {
-    if (numPairs === 1)
-        return 0.5;
-    return 1 / (numPairs * 2 - 1);
+Object.defineProperty(exports, "__esModule", { value: true });
+const initialData_1 = require("./initialData");
+// sums accross an Array
+const reducer = (accumulator, currentValue) => accumulator + currentValue.turns;
+const createAverage = (testResultsForFoodType) => {
+    const totalTurns = testResultsForFoodType.reduce(reducer, 0);
+    return totalTurns / testResultsForFoodType.length;
 };
-const isMatch = (pairCount) => {
-    const randomNumber = Math.random();
-    const matchProb = chanceSame(pairCount);
-    if (matchProb > randomNumber)
-        return true;
-    else
-        return false;
-};
-const runGame = () => {
-    let pairsRemaining = 26;
-    let count = 0;
-    while (pairsRemaining > 0) {
-        const pairFound = isMatch(pairsRemaining);
-        if (pairFound) {
-            pairsRemaining -= 1;
-        }
-        count++;
-    }
-    return count;
-};
-const collectAverage = () => {
-    let testRunCount = 100000;
-    let results = [];
-    let avg;
-    while (testRunCount > 0) {
-        let turns = runGame();
-        testRunCount--;
-        if (typeof turns === 'number')
-            results.push(turns);
-        else
-            throw new Error('non numerical result returned from runGame()');
-    }
-    if (results.length) {
-        const sum = results.reduce(function (a, b) { return a + b; });
-        avg = sum / results.length;
-    }
-    else
-        avg = 0;
-    console.log('ave:', avg);
-};
-collectAverage();
+// populate an average 'turns' object organised by food type
+let averageTurnsByFood = {};
+const foodEntries = Object.keys(initialData_1.firstTest); // all the food types in the study
+foodEntries.forEach(entry => {
+    averageTurnsByFood[entry] = { firstTest: createAverage(initialData_1.firstTest[entry]), secondTest: createAverage(initialData_1.secondTest[entry]) };
+});
+console.log(averageTurnsByFood);
 //# sourceMappingURL=app.js.map

@@ -1,50 +1,21 @@
-const chanceSame = (numPairs: number): number => {
-    if (numPairs === 1) return 0.5;
-    return 1 / (numPairs * 2 - 1);
+import { firstTest, secondTest, TestResult, TestResults } from './initialData';
+
+type AverageForFood = { firstTest: number, secondTest: number };
+
+// sums accross an Array
+const reducer = (accumulator: number, currentValue: TestResult): number =>  accumulator + currentValue.turns;
+
+const createAverage = (testResultsForFoodType: TestResults) => {
+    const totalTurns = testResultsForFoodType.reduce(reducer, 0);
+    return totalTurns/testResultsForFoodType.length;
 }
 
-const isMatch = (pairCount: number): boolean => {
-    const randomNumber = Math.random();
-    const matchProb = chanceSame(pairCount);
-    if (matchProb > randomNumber) return true;
-    else return false;
-}
+// populate an average 'turns' object organised by food type
+let averageTurnsByFood: { [food: string]: AverageForFood } = {};
+const foodEntries = Object.keys(firstTest); // all the food types in the study
 
-const runGame = (): number => {
+foodEntries.forEach( entry => {
+    averageTurnsByFood[entry] = { firstTest: createAverage(firstTest[entry]), secondTest: createAverage(secondTest[entry]) }
+});
 
-    let pairsRemaining = 26;
-    let count = 0;
-
-    while (pairsRemaining > 0) {
-        const pairFound: boolean = isMatch(pairsRemaining);
-        if (pairFound) {
-            pairsRemaining -= 1;
-        }
-        count++;
-    }
-    return count;
-}
-
-const collectAverage = (): void => {
-
-    let testRunCount = 100000;
-    let results: number[] = [];
-    let avg: number;
-
-    while (testRunCount > 0) {
-        let turns = runGame();
-        testRunCount--;
-        if (typeof turns === 'number') results.push(turns);
-        else throw new Error('non numerical result returned from runGame()');
-    }
-
-    if (results.length) {
-        const sum = results.reduce(function (a, b) { return a + b; });
-        avg = sum / results.length;
-    } else avg = 0;
-
-    console.log('ave:', avg);
-}
-
-collectAverage();
-
+console.log(averageTurnsByFood);

@@ -1,16 +1,26 @@
-interface testResults {
-    cocopops: {time: number, turns: number}[],
-    muesli: {time: number, turns: number}[],
-    toast: {time: number, turns: number}[],
-    noFood: {time: number, turns: number}[],
-    smoothy: {time: number, turns: number}[],
-    porridge: {time: number, turns: number}[],
-    upAndGo: {time: number, turns: number}[],
-    yougurt: {time: number, turns: number}[],
-    riceBubbles: {time: number, turns: number}[],
+export interface TestResult {
+    time: number, 
+    turns: number
+    [key: string]: any
+};
+
+export type TestResults = TestResult[];
+
+export interface Summary {
+    fruitPiece: TestResults,
+    cocopops: TestResults,
+    muesli: TestResults,
+    toast: TestResults,
+    noFood: TestResults,
+    smoothy: TestResults,
+    porridge: TestResults,
+    upAndGo: TestResults,
+    yougurt: TestResults,
+    riceBubbles: TestResults,
+    [key: string]: any
 }
 
-const firstTest = {
+export const firstTest: Summary = {
     fruitPiece: [{time: 4.50, turns: 80}, {time: 9.47, turns: 85}, {time: 6.39, turns: 101}],
     cocopops: [{time: 6.07, turns: 60}, {time: 6.48, turns: 78}, {time: 8.29, turns: 108}],
     muesli: [{time: 11.43, turns: 131}, {time: 5.06, turns: 82}, {time: 12.59, turns: 101}],
@@ -23,7 +33,7 @@ const firstTest = {
     riceBubbles: [{time: 6.51, turns: 101}, {time: 6.06, turns: 100}, {time: 6.22, turns: 57}],
 }
 
-const secondTest = {
+export const secondTest: Summary = {
     fruitPiece: [{time: 10.27, turns: 90}, {time: 7.03, turns: 85}, {time: 7.07, turns: 144}],
     cocopops: [{time: 6.01, turns: 117}, {time: 6.32, turns: 107}, {time: 7.13, turns: 137}],
     muesli: [{time: 10.54, turns: 96}, {time: 7.00, turns: 77}, {time: 9.17, turns: 128}],

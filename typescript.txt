@@ -978,11 +978,31 @@ For more detail on using react with typescript check out Microsoft on github: ht
 
 
 
+Indexable Types
+---------------------------------------
 
+https://www.typescriptlang.org/docs/handbook/interfaces.html#indexable-types
 
+We can also describe types that we can “index into” like a[10], or ageMap["daniel"]. Indexable types have an index signature that describes the types we can use to index into the object, along with the corresponding return types when indexing.
 
+    interface StringArray {
+        [index: number]: string;
+    }
 
+    let myArray: StringArray;
+    myArray = ["Bob", "Fred"];
 
+    let myStr: string = myArray[0];
+
+Or:
+
+    interface NumberDictionary {
+        [index: string]: number;
+        length: number;    // ok, length is a number
+        name: string;      // error, the type of 'name' is not a subtype of the indexer
+    }
+
+These get around errors involving accessing object properties with strings.
 
 
 
